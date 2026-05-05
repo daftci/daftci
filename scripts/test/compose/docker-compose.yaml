@@ -1,0 +1,125 @@
+# docker-compose.yaml
+# DAFt compose-test stack. Env vars are rendered into .env by up.sh from
+# config.yaml — do not edit registry/repository/tag here, edit config.yaml.
+
+name: ${COMPOSE_PROJECT_NAME:-daft-compose-test}
+
+x-daft-runtime: &daft_runtime
+  image: daft-runtime:test
+  entrypoint: ['/repo/scripts/test/compose/entrypoint.sh']
+  working_dir: /work/daft
+  depends_on:
+    minio:
+      condition: service_healthy
+
+services:
+  minio:
+    image: ${MINIO_IMAGE}
+    command: server /data --address ":9000" --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 3s
+      retries: 20
+      start_period: 5s
+    volumes:
+      - minio-data:/data
+
+  coordinator:
+    <<: *daft_runtime
+    volumes:
+      - git-shared:/git
+      - daft-coord:/work/daft
+      - ../../..:/repo:ro
+    command: bash scripts/coordinator/loop.sh
+    environment:
+      COORDINATOR_INTERVAL_SECONDS: ${COORDINATOR_INTERVAL_SECONDS:-5}
+      COORDINATOR_PARALLELISM: ${COORDINATOR_PARALLELISM:-4}
+
+  reaper:
+    <<: *daft_runtime
+    volumes:
+      - git-shared:/git
+      - daft-reaper:/work/daft
+      - ../../..:/repo:ro
+    command: bash scripts/reaper/loop.sh
+    environment:
+      REAPER_INTERVAL_SECONDS: ${REAPER_INTERVAL_SECONDS:-3}
+      REAPER_THRESHOLD_SECONDS: ${REAPER_THRESHOLD_SECONDS:-15}
+
+  runner-a:
+    <<: *daft_runtime
+    volumes:
+      - git-shared:/git
+      - daft-runner-a:/work/daft
+      - ../../..:/repo:ro
+    command: bash scripts/runner/loop.sh
+    environment:
+      DAFT_RUNNER_ID: runner-a
+      RUNNER_INTERVAL_SECONDS: ${RUNNER_INTERVAL_SECONDS:-2}
+      DAFT_TIMEOUT_SECONDS: ${JOB_TIMEOUT_SECONDS:-60}
+      DAFT_MINIO_ENDPOINT: ${MINIO_ENDPOINT_INTERNAL:-http://minio:9000}
+      DAFT_MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      DAFT_MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      DAFT_MINIO_BUCKET: ${MINIO_BUCKET:-daft-artifacts}
+
+  runner-b:
+    <<: *daft_runtime
+    volumes:
+      - git-shared:/git
+      - daft-runner-b:/work/daft
+      - ../../..:/repo:ro
+    command: bash scripts/runner/loop.sh
+    environment:
+      DAFT_RUNNER_ID: runner-b
+      RUNNER_INTERVAL_SECONDS: ${RUNNER_INTERVAL_SECONDS:-2}
+      DAFT_TIMEOUT_SECONDS: ${JOB_TIMEOUT_SECONDS:-60}
+      DAFT_MINIO_ENDPOINT: ${MINIO_ENDPOINT_INTERNAL:-http://minio:9000}
+      DAFT_MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      DAFT_MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      DAFT_MINIO_BUCKET: ${MINIO_BUCKET:-daft-artifacts}
+
+  runner-c:
+    <<: *daft_runtime
+    volumes:
+      - git-shared:/git
+      - daft-runner-c:/work/daft
+      - ../../..:/repo:ro
+    command: bash scripts/runner/loop.sh
+    environment:
+      DAFT_RUNNER_ID: runner-c
+      RUNNER_INTERVAL_SECONDS: ${RUNNER_INTERVAL_SECONDS:-2}
+      DAFT_TIMEOUT_SECONDS: ${JOB_TIMEOUT_SECONDS:-60}
+      DAFT_MINIO_ENDPOINT: ${MINIO_ENDPOINT_INTERNAL:-http://minio:9000}
+      DAFT_MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      DAFT_MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      DAFT_MINIO_BUCKET: ${MINIO_BUCKET:-daft-artifacts}
+
+  test-driver:
+    image: daft-runtime:test
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - git-shared:/git
+      - daft-driver:/work/daft
+      - ../../..:/repo
+    working_dir: /repo
+    entrypoint: ['tail', '-f', '/dev/null']
+    environment:
+      DAFT_MINIO_ENDPOINT: ${MINIO_ENDPOINT_INTERNAL:-http://minio:9000}
+      DAFT_MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      DAFT_MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      DAFT_MINIO_BUCKET: ${MINIO_BUCKET:-daft-artifacts}
+
+volumes:
+  minio-data:
+  git-shared:
+  daft-coord:
+  daft-reaper:
+  daft-runner-a:
+  daft-runner-b:
+  daft-runner-c:
+  daft-driver:

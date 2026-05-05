@@ -1,0 +1,56 @@
+# config.yaml
+# DAFt compose-test environment config.
+# Edit `images.*.registry` to pull from a private mirror; defaults are docker hub.
+
+version: 1
+
+# Colima lifecycle (macOS only; Linux ignores this section).
+colima:
+  profile: daft-test
+  cpu: 2
+  memory: 4         # GB
+  disk: 20          # GB
+
+# OCI image sources for every container the stack pulls.
+# These are split into registry / repository / tag so a private mirror or pinned
+# digest can be substituted without touching the docker-compose.yaml.
+images:
+  base:
+    registry: docker.io
+    repository: library/alpine
+    tag: '3.19'
+  minio:
+    registry: docker.io
+    repository: minio/minio
+    tag: RELEASE.2024-09-09T16-59-28Z
+  mc:
+    registry: docker.io
+    repository: minio/mc
+    tag: RELEASE.2024-09-09T16-59-28Z
+
+# Compose project (used by `docker compose -p ${project_name} -f ${file}`).
+compose:
+  project_name: daft-compose-test
+  file: scripts/test/compose/docker-compose.yaml
+
+# Runtime knobs for the in-container daft loops (faster than prod for test
+# responsiveness).
+runtime:
+  runners: 3
+  runner_interval_seconds: 2
+  coordinator_interval_seconds: 5
+  reaper_interval_seconds: 3
+  reaper_threshold_seconds: 15
+  job_timeout_seconds: 60
+
+# MinIO bucket + admin creds (test-only).
+minio:
+  bucket: daft-artifacts
+  access_key: minioadmin
+  secret_key: minioadmin
+  endpoint_internal: http://minio:9000
+
+# Test upstream repos created on the bare-repo volume.
+upstreams:
+  - name: test-foo
+  - name: test-bar

@@ -6,3 +6,16 @@
 # macOS Finder metadata
 .DS_Store
 **/.DS_Store
+
+# DAFt local-only debug trail (workspace files are per-process clones)
+/.daft/workspace/*
+!/.daft/workspace/.keep
+
+# DAFt host-local pointer to this host's runner identity (not committed)
+.daft/.current_runner_id
+
+# DAFt host-local stop files for graceful loop shutdown
+.daft/*.stop
+
+# Compose-test rendered env file (contains test-only MinIO creds; do not commit)
+/scripts/test/compose/.env

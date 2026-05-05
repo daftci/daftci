@@ -1,9 +1,9 @@
-# D.A.F.T — Dumb As Fuck Turds
+# D.A.F.T — Dumb And Fast Tasks
 
 **Your `git` partner.**
 A CI/CD system that lives in your repo, runs on your machines, and trusts your signatures.
 
-The "turds" — small, single-purpose Bash components — are the unit of orchestration. No server. No database. No JVM.
+The "tasks" — small, single-purpose Bash components — are the unit of orchestration. No server. No database. No JVM.
 No SaaS bill.
 
 ## The Name
@@ -13,23 +13,20 @@ Actions hosted runners, CircleCI, Buildkite, GitLab Premium, Harness, the rest o
 
 ### Heritage
 
-`DAFT` is `D.A.F.T` is **Dumb As Fuck Turds**.
+`DAFT` is `D.A.F.T` is **Dumb and Fast Tasks**.
 
-That is the original name and it is preserved, deliberately, in commit zero of this repository. The cleaner branding —
-**DAFt CICD** — arrives in commit one. Both are the truth. Anyone who runs `git log --reverse` to read the project's
-first commit gets the joke; everyone else gets the README. The whole DAFt philosophy is *history is the audit log, the
-repo is the database*, so encoding the origin name in the first commit is not a gimmick — it is consistent with the
-architecture. Same repo, different signals for different readers, no contradiction.
+The whole DAFt philosophy is *history is the audit log, the repo is the database*, so encoding the origin name in
+the first commit is not a gimmick — it is consistent with the architecture.
+Same repo, different signals for different readers, no contradiction.
 
 This is the Linus precedent in miniature. Linus Torvalds wrote Git because CVS, SCCS, and SVN were not cutting it for
 him. He named it Git ("a stupid content tracker", "I'm an egotistical bastard, so I name all my projects after
 myself"). Deliberately unserious name on a tool that became infrastructure. There is also a real tradition of
-irreverent FOSS naming this slots into — `thefuck`, suckless, GIMP, `awk` — tools whose creators refused to dress them
+irreverent FOSS naming this slots into — `git`, GIMP, `awk` — tools whose creators refused to dress them
 up. DAFt joins that lineage.
 
 The cleaned-up name **DAFt CICD** is what the project answers to in production, in pitches, in Slack channels where
-people share tools without having to bowdlerize. The dirty name is the foundation stone, signed and immutable, for the
-hackers who go looking.
+people share tools without having to bowdlerize.
 
 This is the author's legacy. Use it, fork it, ship it.
 
@@ -141,7 +138,7 @@ The filesystem structure defines the global state. Every directory is a bucket o
 ├── vault/                 # age-encrypted secrets per Runner public key
 ├── workspace/             # Shared log buffers and artifact transit
 ├── compliance/            # Signed build manifests (audit-ready chain of custody)
-└── plugins/               # The Turd-kit: responders & lifecycle hooks
+└── plugins/               # The Task-kit: responders & lifecycle hooks
     ├── lifecycle/         # PROVISION, BOOTSTRAP, DRAIN, TERMINATE
     ├── responders/        # Build, Scan, Deploy, Notify, Matrix, Fan-in
     └── ingestors/         # Webhook, ChatOps, Timer, Alarm scripts
