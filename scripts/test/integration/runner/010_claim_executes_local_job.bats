@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 # 010_claim_executes_local_job.bats
-# A runner claims a queued job, executes daft/jobs/build, captures its output, and
+# A runner claims a queued job, executes .daft/jobs/build, captures its output, and
 # leaves a status reflecting the exit code.
 
 load '../lib/setup'

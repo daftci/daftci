@@ -6,7 +6,7 @@
 #   daft_test_teardown — clean up tmpdir
 #   make_local_bare    — create a local bare git repo at $1
 #   commit_to_workdir  — commit-and-push from $1 (workdir clone) into the matching bare
-#   build_workdir_with_job_script — populate workdir at $1 with daft/jobs/build that exits $2
+#   build_workdir_with_job_script — populate workdir at $1 with .daft/jobs/build that exits $2
 
 daft_test_setup() {
   TMPDIR_TEST="$(mktemp -d)"
@@ -48,10 +48,10 @@ build_workdir_with_job_script() {
   local -r workdir="${1}"
   local -r exit_code="${2:-0}"
   local -r bare="${3}"
-  mkdir -p "${workdir}/daft/jobs"
+  mkdir -p "${workdir}/.daft/jobs"
   printf '#!/usr/bin/env bash\nset -o errexit\necho "hello from build"\nexit %s\n' "${exit_code}" \
-    > "${workdir}/daft/jobs/build"
-  chmod +x "${workdir}/daft/jobs/build"
+    > "${workdir}/.daft/jobs/build"
+  chmod +x "${workdir}/.daft/jobs/build"
   ( cd "${workdir}" && git init --quiet \
     && git config user.email 'test@example.com' && git config user.name 'test' \
     && git config commit.gpgsign false \

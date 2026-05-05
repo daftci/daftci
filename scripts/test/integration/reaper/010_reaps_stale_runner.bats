@@ -15,7 +15,7 @@ teardown() { daft_test_teardown; }
     > ".daft/runners/${id}/identity.json"
   printf '{"runner_id":"%s","last_seen_at":"old","last_seen_epoch":1,"tick_count":0,"current_job_id":null}\n' "${id}" \
     > ".daft/runners/${id}/heartbeat.json"
-  printf '{"job_id":"byiq-foo-abc1234","repo_name":"byiq-foo","clone_url":"x","ref":"refs/heads/main","sha":"abc1234","isa":"x86_64","enqueued_at":"x","job_script_path":"daft/jobs/build"}\n' \
+  printf '{"job_id":"byiq-foo-abc1234","repo_name":"byiq-foo","clone_url":"x","ref":"refs/heads/main","sha":"abc1234","isa":"x86_64","enqueued_at":"x","job_script_path":".daft/jobs/build"}\n' \
     > ".daft/active/${id}/byiq-foo-abc1234/job.json"
 
   REAPER_THRESHOLD_SECONDS=1 bash scripts/reaper/tick.sh

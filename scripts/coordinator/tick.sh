@@ -253,7 +253,7 @@ function build_job_json() {
   clone_url="$(registry_repo_field "${name}" 'clone_url')"
   ref="$(registry_repo_field "${name}" 'ref')"
   now="$(utc_rfc3339_ns)"
-  printf '{"job_id":"%s","repo_name":"%s","clone_url":"%s","ref":"%s","sha":"%s","isa":"x86_64","enqueued_at":"%s","job_script_path":"daft/jobs/build"}\n' \
+  printf '{"job_id":"%s","repo_name":"%s","clone_url":"%s","ref":"%s","sha":"%s","isa":"x86_64","enqueued_at":"%s","job_script_path":".daft/jobs/build"}\n' \
     "${jid}" "${name}" "${clone_url}" "${ref}" "${sha}" "${now}"
 }
 

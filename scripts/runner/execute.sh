@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # execute.sh
-# Clone work repo at the job's sha, run daft/jobs/build under timeout, capture
+# Clone work repo at the job's sha, run .daft/jobs/build under timeout, capture
 # stdout/stderr to .daft/workspace/<job-id>.log, record exit code.
 # Args: JOB_ID (must already be in .daft/active/<my-id>/<JOB_ID>/)
 
@@ -117,7 +117,7 @@ function invoke_job_script() {
   local -r sha="${7}"
   local artifacts script
   artifacts="${PWD}/${checkout}/artifacts"
-  script="${checkout}/daft/jobs/build"
+  script="${checkout}/.daft/jobs/build"
   mkdir -p "${artifacts}"
   if [ ! -x "${script}" ]; then
     finalize_status "${job_dir}" 'script_missing' '127'
@@ -156,7 +156,7 @@ function invoke_in_checkout() {
   shift 2
   ( cd "${checkout}" \
       && export_job_env "$@" \
-      && with_timeout "${DAFT_TIMEOUT_SECONDS}" ./daft/jobs/build ) \
+      && with_timeout "${DAFT_TIMEOUT_SECONDS}" ./.daft/jobs/build ) \
       >> "${log_path}" 2>&1
 }
 

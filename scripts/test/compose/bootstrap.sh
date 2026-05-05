@@ -83,9 +83,9 @@ function seed_upstream() {
   local tmp
   tmp="$(mktemp -d)"
   ( cd "${tmp}" && git init -q --initial-branch=main \
-    && mkdir -p daft/jobs \
-    && build_script_for "${n}" > daft/jobs/build \
-    && chmod +x daft/jobs/build \
+    && mkdir -p .daft/jobs \
+    && build_script_for "${n}" > .daft/jobs/build \
+    && chmod +x .daft/jobs/build \
     && git add -A \
     && git commit -q -m "${n}: initial commit" \
     && git remote add origin "/git/${n}.git" \
