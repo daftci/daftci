@@ -1,0 +1,4 @@
+title = "daftci gitleaks config"
+
+[extend]
+useDefault = true

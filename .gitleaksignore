@@ -1,0 +1,3 @@
+# Format: <commit-sha>:<path>:<rule-id>:<line>
+# Add entries here only after manual verification that a flagged finding is a
+# false positive (e.g., a public key, a fixture, an example from documentation).

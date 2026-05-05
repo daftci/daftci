@@ -1,0 +1,8 @@
+.idea
+.idea/**
+
+/.claude/
+
+# macOS Finder metadata
+.DS_Store
+**/.DS_Store
