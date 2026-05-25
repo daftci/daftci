@@ -296,3 +296,53 @@ help:
 	@echo '  compose-lifecycle ARG=up|down|status|purge'
 	@echo '                                  Direct colima control'
 	@echo '  compose-bootstrap               Re-run bootstrap inside test-driver'
+
+## --- governance-refresh injected from .standards/templates/Makefile ---
+
+check-adr-metadata:
+	@echo "🔍 Checking ADR metadata..."
+	bash scripts/check/adr-metadata.sh
+
+check-governance-metadata:
+	@echo "🔍 Checking governance metadata..."
+	bash scripts/check/governance-metadata.sh
+
+check-rfc-metadata:
+	@echo "🔍 Checking RFC metadata..."
+	bash scripts/check/rfc-metadata.sh
+
+ci-governance-gate:
+	@echo "🚦 Governance CI gate (governance-refresh --dry-run)..."
+	bash scripts/ci/governance-gate.sh
+
+setup-bats:
+	@echo "🔧 Installing bats-core test harness..."
+	bash scripts/ci/setup-bats.sh
+
+verify-canonical:
+	@echo "🔍 Verifying canonical scripts in downstream repo (REPO=<path>)..."
+	bash scripts/ci/verify-canonical-scripts.sh $(REPO)
+
+install-hooks:
+	@echo "🪝 Installing git pre-commit hook..."
+	bash scripts/install-hooks.sh
+
+lint-markdown:
+	@echo "🔍 Running markdown lint (markdownlint-cli2)..."
+	bash scripts/lint/markdown.sh
+
+coverage-baseline-init:
+	@echo "🪴 coverage-baseline-init (capture current LCOV)..."
+	bash scripts/test/coverage-baseline-init.sh
+
+coverage-go:
+	@echo "📊 Go coverage..."
+	bash scripts/test/coverage-go.sh
+
+ci-coverage-no-regression:
+	@echo "🚦 coverage-no-regression (per-file)..."
+	bash scripts/test/coverage-no-regression.sh
+
+coverage-rust:
+	@echo "📊 Rust coverage (cargo-llvm-cov)..."
+	bash scripts/test/coverage-rust.sh
