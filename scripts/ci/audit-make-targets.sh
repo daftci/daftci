@@ -19,7 +19,9 @@
 #     (Per .standards/governance/ci.md "Audit topology" — gating moves to
 #     `make ci-governance-gate` once the governance-refactor lands.)
 #   - Non-zero exit is reserved for HARD errors: malformed args, unreadable
-#     Makefile, missing workflows dir — not for rule violations.
+#     Makefile — not for rule violations. A missing .github/workflows/
+#     directory is NOT a hard error: consumers may use a different CI
+#     provider or not yet have CI wired up; Rule 1 simply skips in that case.
 # Safe to run locally: make audit
 
 # bash configuration:
@@ -38,6 +40,12 @@ readonly MAKEFILE="${REPO_ROOT}/Makefile"
 readonly WORKFLOWS_DIR="${REPO_ROOT}/.github/workflows"
 readonly SCRIPTS_DIR="${REPO_ROOT}/scripts"
 
+# Populated by build_expanded_makefile: a temp file containing the consumer
+# Makefile with all `include` / `-include` / `sinclude` directives inlined
+# recursively. Rules 2–5 read this expanded view so they see canonical
+# targets inherited via include.
+EXPANDED_MAKEFILE=''
+
 function log() {
   printf '%s\n' "${1:-}"
 }
@@ -49,10 +57,59 @@ function validate_args() {
   fi
 }
 
+# Inline include directives recursively. Paths are resolved relative to
+# REPO_ROOT (Make's CWD). Missing files and Make-variable-bearing paths
+# are silently skipped. Cycles broken by a colon-delimited visited set.
+function _inline_includes() {
+  local -r src="${1}"
+  local -r visited="${2}"
+  local line
+  while IFS= read -r line || [ -n "${line}" ]; do
+    if [[ "${line}" =~ ^[[:space:]]*(-?include|sinclude)[[:space:]]+(.+)$ ]]; then
+      _inline_include_paths "${BASH_REMATCH[2]}" "${visited}"
+      continue
+    fi
+    printf '%s\n' "${line}"
+  done < "${src}"
+}
+
+function _inline_include_paths() {
+  local -r paths="${1}"
+  local -r visited="${2}"
+  local p
+  for p in ${paths}; do
+    [[ "${p}" == *'$'* ]] && continue
+    local full="${REPO_ROOT}/${p}"
+    [ -f "${full}" ] || continue
+    [[ "${visited}" == *":${full}:"* ]] && continue
+    _inline_includes "${full}" "${visited}:${full}:"
+  done
+}
+
+function build_expanded_makefile() {
+  EXPANDED_MAKEFILE="$(mktemp -t audit-make-expanded.XXXXXX)"
+  _inline_includes "${MAKEFILE}" ":${MAKEFILE}:" > "${EXPANDED_MAKEFILE}"
+}
+
+function cleanup_expanded_makefile() {
+  if [ -n "${EXPANDED_MAKEFILE}" ] && [ -f "${EXPANDED_MAKEFILE}" ]; then
+    rm -f "${EXPANDED_MAKEFILE}"
+  fi
+}
+
 # ---------------------------------------------------------------------------
 # Rule 1: All workflow run: steps must be `make <target>`.
+#
+# Consumers may legitimately have no GitHub Actions workflows (different CI
+# provider, or CI not yet wired up). Treat a missing workflows directory as
+# "nothing to audit" rather than a hard error — a hard error here used to
+# bury Rules 2–5 under a stray `grep: No such file or directory` message.
 # ---------------------------------------------------------------------------
 function check_workflow_run_steps() {
+  if [ ! -d "${WORKFLOWS_DIR}" ]; then
+    return 0
+  fi
+
   local failed=0
   local violations
 
@@ -92,8 +149,8 @@ function check_script_targets() {
       continue
     fi
 
-    # Check if the script path appears anywhere in the Makefile.
-    if ! grep -qF "${script_rel}" "${MAKEFILE}"; then
+    # Check if the script path appears anywhere in the (expanded) Makefile.
+    if ! grep -qF "${script_rel}" "${EXPANDED_MAKEFILE}"; then
       log "❌ Rule 2: no Makefile target invokes: ${script_rel}"
       failed=1
     fi
@@ -119,8 +176,9 @@ function check_universal_targets() {
   local failed=0
 
   for target in "${UNIVERSAL_TARGETS[@]}"; do
-    # A target is defined if Makefile contains a line starting with `<target>:`.
-    if ! grep -qE "^${target}:" "${MAKEFILE}"; then
+    # A target is defined if the (expanded) Makefile contains a line
+    # starting with `<target>:`.
+    if ! grep -qE "^${target}:" "${EXPANDED_MAKEFILE}"; then
       log "❌ Rule 3: universal Makefile target missing: ${target}"
       failed=1
     fi
@@ -190,7 +248,7 @@ function check_recipe_shape() {
       active_count=0
       active_line=''
     fi
-  done < "${MAKEFILE}"
+  done < "${EXPANDED_MAKEFILE}"
 
   # Evaluate the last target if the file did not end with a blank line.
   if [ -n "${current_target}" ]; then
@@ -238,6 +296,11 @@ function _eval_recipe_shape() {
 
   if [[ "${stripped}" =~ ^(bash[[:space:]]+|sh[[:space:]]+|\.?/?)((\.standards/)?scripts/[^[:space:]]+\.sh) ]]; then
     # Rule 4 satisfied. Now Rule 5: does the referenced script exist on disk?
+    # The canonical Makefile (templates/Makefile.canonical) only references
+    # scripts that ARE shipped to consumers by governance-refresh, so a
+    # broken Rule 5 finding always points to a real bug — either consumer
+    # drift or a missing canonical script — never to a known-standards-only
+    # script masquerading as consumer-facing.
     local script_path="${BASH_REMATCH[2]}"
     if [ ! -f "${REPO_ROOT}/${script_path}" ]; then
       log "❌ Rule 5: target '${tgt}' invokes ${script_path} which does not exist on disk."
@@ -257,6 +320,8 @@ function _eval_recipe_shape() {
 # ---------------------------------------------------------------------------
 function main() {
   validate_args "${@:-}"
+  build_expanded_makefile
+  trap cleanup_expanded_makefile EXIT
 
   local overall=0
 

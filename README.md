@@ -326,8 +326,8 @@ audience. Laminar nails this; most competitors don't.
 ### 2. Live Log Tailing
 
 Still matters with one user. When a build fails, the developer wants `tail -f` semantics, not `git log --grep`. The
-runner streaming to `.daft/workspace/$JOB_ID.log` with a `tail -f` endpoint is sufficient at this scale — but it should be
-explicit in the spec, not implied.
+runner streaming to `.daft/workspace/$JOB_ID.log` with a `tail -f` endpoint is sufficient at this scale — but it
+should be explicit in the spec, not implied.
 
 ### 3. Crash Recovery Janitor
 

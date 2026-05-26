@@ -31,7 +31,7 @@ The design optimizes for three properties:
 ## 2. Glossary
 
 | Term | Definition |
-|---|---|
+| --- | --- |
 | **Submitter** | Human author of a submission. Identified by a long-term age public key whose fingerprint is the canonical handle. |
 | **Approver** | Human authorized by org policy to approve a submitter. Authority defined in `.daft/authz/policies/submitter-approval.sh`. |
 | **Reviewer** | Human authorized to approve or request changes on a submission. Authority defined in `.daft/authz/policies/<repo-or-org>-review.sh`. |
@@ -58,7 +58,7 @@ B2: Canonical Build           (machine, Trusted pool, build+org vault, post-merg
 ```
 
 | # | Gate | Pool | Vault scope | Verifies |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **G1** | Submitter Approval | n/a | n/a | Author key currently approved |
 | **G2** | Static Checks | Quarantine | None | Lint, style, security scan, license, supply-chain |
 | **B1** | Workspace Build | Quarantine | `users/<fpr>/` + `build/` | `target → source` merges, builds, non-trusted tests pass |
@@ -479,7 +479,7 @@ For DAFt's segment this tradeoff is right: collisions are rare, target history c
 ```
 
 | Tier | Examples | Recipients | Where readable |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `users/<fpr>/` | Submitter's personal API tokens, scratch test creds | Quarantine pool key | B1 |
 | `build/` | Private package-registry pull tokens, signed-binary verification keys, internal proxy URLs | Quarantine pool key + Trusted pool key | B1, B2 |
 | `org/` | Deploy keys, DB write creds, release-signing keys, prod admin tokens, notification creds | Trusted pool key only | B2 |
@@ -496,7 +496,7 @@ private key it was encrypted to no longer exists.
 ## 7. Runner Pool Model
 
 | Pool | Holds private key for | Runs gates |
-|---|---|---|
+| --- | --- | --- |
 | **Quarantine** | Quarantine pool key (decrypts `users/<*>/`, `build/`) | G2, B1, land-time B1 re-run |
 | **Trusted** | Trusted pool key (decrypts `build/`, `org/`) | B2 |
 
@@ -737,7 +737,7 @@ All policy is bash scripts under `.daft/authz/policies/`. Each script takes JSON
 exits 0 = allowed, non-zero = denied (with reason on stderr).
 
 | Script | Decides |
-|---|---|
+| --- | --- |
 | `submitter-approval.sh` | Is this approver allowed to approve this submitter? |
 | `<repo-or-org>-review.sh` | Are the current approvals sufficient to land this submission? |
 | `land-policy.sh` | Is this merger allowed to land this submission, and what to do on target drift |
@@ -818,7 +818,7 @@ These are not blockers for Group 4 but should be settled before substrate freeze
 Substrate work, sized within Group 4 (~4 weeks solo):
 
 | Week | Deliverable |
-|---|---|
+| --- | --- |
 | 1 | `.daft/submissions/` filesystem contract; `manifest.json`, `status.json` schemas; CLI scaffolding (`make daft-crs-submit`, `daft-crs-list`, `daft-crs-status`); state-transition commit message conventions |
 | 2 | G1 + G2 gate runners (sleep-loop scripts, like coordinator); `authz/submitters/` approval/revocation flow; static-check contract + reference org-mandatory checks (gitleaks, syft, license-scan) |
 | 3 | B1 workspace build (Quarantine pool, Build-vault scope, MICROVM); merge mechanics (target → source); `requires_trusted_vault` test-skip protocol; build report schema |
