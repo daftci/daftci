@@ -17,6 +17,11 @@ set -o pipefail
 declare -r LOG_FILE='/tmp/daft_coordinator.log'
 declare -r STOP_FILE='.daft/workspace/coordinator.stop'
 declare -r TICK_SCRIPT='scripts/coordinator/tick.sh'
+
+# shellcheck source=scripts/lib/daft/intervals.sh
+. scripts/lib/daft/intervals.sh
+intervals_load
+
 declare -rx COORDINATOR_INTERVAL_SECONDS="${COORDINATOR_INTERVAL_SECONDS:-60}"
 
 function main() {

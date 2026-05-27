@@ -17,6 +17,11 @@ set -o pipefail
 declare -r LOG_FILE='/tmp/daft_reaper.log'
 declare -r STOP_FILE='.daft/workspace/reaper.stop'
 declare -r TICK_SCRIPT='scripts/reaper/tick.sh'
+
+# shellcheck source=scripts/lib/daft/intervals.sh
+. scripts/lib/daft/intervals.sh
+intervals_load
+
 declare -rx REAPER_INTERVAL_SECONDS="${REAPER_INTERVAL_SECONDS:-30}"
 
 function main() {

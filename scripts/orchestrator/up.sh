@@ -15,10 +15,14 @@ set -o pipefail
 
 declare -r LOG_FILE='/tmp/daft_orchestrator_up.log'
 
+# shellcheck source=scripts/lib/daft/intervals.sh
+. scripts/lib/daft/intervals.sh
+
 function main() {
   exec 5>&1
   validate_args "${@:-}"
   log '🚀 orchestrator up'
+  intervals_load
   start_all
 }
 

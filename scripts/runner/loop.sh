@@ -15,6 +15,11 @@ set -o pipefail
 
 declare -r LOG_FILE='/tmp/daft_runner.log'
 declare -r STOP_FILE='.daft/workspace/runner.stop'
+
+# shellcheck source=scripts/lib/daft/intervals.sh
+. scripts/lib/daft/intervals.sh
+intervals_load
+
 declare -rx RUNNER_INTERVAL_SECONDS="${RUNNER_INTERVAL_SECONDS:-5}"
 
 # shellcheck source=scripts/lib/daft/runner_id.sh
