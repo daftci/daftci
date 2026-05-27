@@ -20,6 +20,8 @@ declare -r REGISTRY='.daft/repos/registry.yaml'
 . scripts/lib/daft/git_lock.sh
 # shellcheck source=scripts/lib/daft/repos_yaml.sh
 . scripts/lib/daft/repos_yaml.sh
+# shellcheck source=scripts/lib/daft/reload.sh
+. scripts/lib/daft/reload.sh
 
 function main() {
   exec 5>&1
@@ -85,6 +87,7 @@ function add_repo() {
   ensure_unique "${name}"
   log "📥 Adding repo: ${name} ${url} ${ref}"
   append_repo "${name}" "${url}" "${ref}"
+  reload_bump_pending
   commit_local_or_push "repo_add: ${name}" 3
   log "✅ Added ${name}"
 }

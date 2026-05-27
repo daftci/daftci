@@ -26,6 +26,8 @@ declare -r SERVICE='daft-reaper'
 . scripts/lib/daft/time.sh
 # shellcheck source=scripts/lib/daft/logger.sh
 . scripts/lib/daft/logger.sh
+# shellcheck source=scripts/lib/daft/reload.sh
+. scripts/lib/daft/reload.sh
 
 function main() {
   exec 5>&1
@@ -51,9 +53,23 @@ function run_tick() {
   if has_origin_remote; then
     pull_rebase >/dev/null 2>&1 || log '⚠️  pull_rebase warning'
   fi
+  maybe_handle_reload
   scan_and_recover
   commit_local_or_push 'reaper: tick' 3 || log '⚠️  push failed; will retry next tick'
   log '✅ reaper tick end'
+}
+
+function maybe_handle_reload() {
+  if ! reload_changed_for 'reaper'; then return 0; fi
+  local cur
+  cur="$(reload_current_tick)"
+  log "🔔 reload signal seen (tick=${cur}); dropping caches"
+  reload_caches
+  reload_write_last_seen 'reaper' "${cur}"
+}
+
+function reload_caches() {
+  :
 }
 
 function scan_and_recover() {

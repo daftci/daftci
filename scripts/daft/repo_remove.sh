@@ -20,6 +20,8 @@ declare -r REGISTRY='.daft/repos/registry.yaml'
 . scripts/lib/daft/git_lock.sh
 # shellcheck source=scripts/lib/daft/repos_yaml.sh
 . scripts/lib/daft/repos_yaml.sh
+# shellcheck source=scripts/lib/daft/reload.sh
+. scripts/lib/daft/reload.sh
 
 function main() {
   exec 5>&1
@@ -64,6 +66,7 @@ function remove_repo() {
   log "🗑️  Removing repo: ${name}"
   strip_repo "${name}"
   strip_state_file "${name}"
+  reload_bump_pending
   commit_local_or_push "repo_remove: ${name}" 3
   log "✅ Removed ${name}"
 }

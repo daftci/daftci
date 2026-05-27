@@ -13,7 +13,7 @@ include .standards/templates/Makefile.canonical
 ## Targets that drifted from canonical (see migration report) remain below
 ## and should be reconciled by hand.
 
-.PHONY: build lint-md unit-test integration-test clean coverage bootstrap-standards install-hooks daft-init daft-repo-add daft-repo-remove daft-repo-list daft-runner-init daft-coordinator daft-coordinator-tick daft-coordinator-check-repo daft-reaper daft-reaper-tick daft-runner daft-runner-janitor daft-runner-tick daft-runner-claim daft-runner-execute daft-runner-release daft-runner-heartbeat daft-doctor daft-status daft-tail-log daft-coordinator-status daft-runner-list integration-test-compose compose-up compose-down compose-purge compose-lifecycle compose-bootstrap compose-entrypoint-info help
+.PHONY: build lint-md unit-test integration-test clean coverage bootstrap-standards install-hooks daft-init daft-repo-add daft-repo-remove daft-repo-list daft-repo-reload daft-runner-init daft-coordinator daft-coordinator-tick daft-coordinator-check-repo daft-reaper daft-reaper-tick daft-runner daft-runner-janitor daft-runner-tick daft-runner-claim daft-runner-execute daft-runner-release daft-runner-heartbeat daft-orchestrator-up daft-orchestrator-down daft-orchestrator-status daft-doctor daft-status daft-tail-log daft-coordinator-status daft-runner-list integration-test-compose compose-up compose-down compose-purge compose-lifecycle compose-bootstrap compose-entrypoint-info help
 
 ## ── DAFt MVP — setup ─────────────────────────────────────────────────────────
 
@@ -28,6 +28,9 @@ daft-repo-remove:
 
 daft-repo-list:
 	bash scripts/daft/repo_list.sh
+
+daft-repo-reload:
+	bash scripts/daft/repo_reload.sh
 
 daft-runner-init:
 	bash scripts/daft/runner_init.sh
@@ -73,6 +76,17 @@ daft-runner-release:
 
 daft-runner-heartbeat:
 	bash scripts/runner/heartbeat.sh
+
+## ── DAFt MVP — orchestrator (coordinator + reaper as background PID-file procs) ─
+
+daft-orchestrator-up:
+	bash scripts/orchestrator/up.sh
+
+daft-orchestrator-down:
+	bash scripts/orchestrator/down.sh
+
+daft-orchestrator-status:
+	bash scripts/orchestrator/status.sh
 
 ## ── DAFt MVP — ops helpers ───────────────────────────────────────────────────
 
